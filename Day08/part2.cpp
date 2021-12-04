@@ -1,0 +1,64 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+
+class instruction {
+public:
+    std::string operation;
+    int step;
+    bool executed;
+    instruction(std::string o, int s) { operation = o; step = s; executed = false; }
+};
+
+int main() {
+    std::ifstream file("input.txt");
+    if (file.is_open()) {
+        std::string line;
+        std::vector<instruction> v;
+        while(std::getline(file, line)) {
+            int step = std::stoi(line.substr(5));
+            if (line.at(4) == '-')
+                step = -step;
+            v.push_back(instruction(line.substr(0, 3), step));
+        }
+        file.close();
+
+        int k = 0;
+        while (k < v.size()) {
+            if (v.at(k).operation == "jmp")
+                v.at(k).operation = "nop";
+            else if (v.at(k).operation == "nop")
+                v.at(k).operation = "jmp";
+            else {
+                k++;
+                continue;
+            }
+
+            for (int j = 0; j < v.size(); j++)
+                v.at(j).executed = false;
+            int i = 0;
+            int acc = 0;
+            while (v.at(i).executed == false) {
+                v.at(i).executed = true;
+                if (v.at(i).operation == "jmp")
+                    i += v.at(i).step;
+                else if (v.at(i).operation == "acc") {
+                    acc += v.at(i).step;
+                    i++;
+                }
+                else
+                    i++;
+                if (i >= v.size()) {
+                    std::cout << acc << std::endl;
+                    return 0;
+                }
+            }
+            if (v.at(k).operation == "jmp")
+                v.at(k).operation = "nop";
+            else if (v.at(k).operation == "nop")
+                v.at(k).operation = "jmp";
+            k++;
+        }
+    }
+    return 1;
+}
